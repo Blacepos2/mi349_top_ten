@@ -1,0 +1,175 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+	<meta charset="UTF-8">
+	<meta http-equiv="X-UA-Compatible" content="IE=edge">
+	<meta name="viewport" content="width=device-width, initial-scale=1.0">
+	<link rel="stylesheet" href="style.css">
+	<title>Node.js Webserver</title>
+</head>
+<body>
+	<header>
+		<h1>Node.js Beginner Tutorial</h1>
+	</header>
+	<article id="tutorial">
+		<h2>Getting Started</h2>
+		<section class="tutorial-section">
+			<h3>What is Node.js?</h3>
+			<p>
+				To answer that question, we have to understand what JavaScript
+				is. JavaScript is a language which is often used to make
+				websites more interactive, but in order for it to work, it
+				needs a runtime environment for it to do any computation on a
+				local machine. Every browser that supports JavaScript needs an
+				engine capable of executing the code. For example, Chrome uses
+				an engine called v8 and Firefox uses an engine called SpiderMonkey.
+				Before node, using a browser was pretty much the only way to
+				execute JavaScript code.
+			</p>
+			<p>
+				The concept behind Node.js is to create an environment for
+				JavaScript to execute outside of a browser. Node.js is really just a C++
+				program which uses Chrome's v8 engine to execute JavaScript code.
+				Unlike a browser though, Node has a number of additional
+				capabilities which make it ideal for server-side programming.
+				For example, it can interact with the filesystem directly as
+				well as send and receive HTTP requests.
+			</p>
+		</section>
+		<section class="tutorial-section">
+			<h3>Your First Program</h3>
+			<p>
+				You can download a binary for Node.js on their <a href="https://nodejs.org">main website</a>.
+				From there, getting to a "Hello World!" program is super easy.
+				Simply write the JavaScript code as you normally would, but this
+				time, use the node executable instead of a browser.
+			</p>
+			<h5 class="filename">helloworld.js</h5>
+			<pre>
+<code>console.log("Hello World!");</code></pre>
+			<p>
+				To run the code, simply run the file using the node executable.
+			</p>
+			<pre>
+<code>$ node helloworld.js</code></pre>
+		</section>
+		<section class="tutorial-section">
+			<h3>Simple HTTP server</h3>
+			<p>
+				Node.js can be a little bit more useful than that though. We are
+				now going to make a simple http server using the <code>http</code>
+				module provided by Node.js.
+			</p>
+			<p>
+				We are going to need to include the <code>http</code> module as
+				it is not in the global scope by default. To create an object
+				that represents the module, we can use the <code>require("modulename")</code>
+				function
+			</p>
+			<pre>
+<code>const http = require("http");</code></pre>
+			<p>
+				Next we are going to use a useful function in the module
+				called <code>createServer</code>. This will return a server object
+				which we can have listen on a port. It will also allow us to provide
+				a callback function which will handle HTTP requests asynchronously.
+			</p>
+			<pre>
+<code>const server = http.createServer((request, response) => {
+    // handle requests here:
+
+    response.setHeader("Content-Type", "text/plain");
+    response.statusCode = 200;
+    response.end("hello");
+
+});</code></pre>
+			<p>
+				As you can see, the callback has two arguments, <code>request</code>
+				and <code>response</code>. <code>request</code> is an object which stores a lot
+				of information about what kind of request the server received. <code>response</code>
+				is an object which we write to to prepare the content of our response.
+			</p>
+			<p>
+				In our simple response, we do three things. The first is telling what kind
+				of data we are sending with the "Content-Type" field of <code>setHeader</code>.
+				We are sending plain text so we pass in "text/plain". The second is setting the
+				status code so the client can know if their request was successful. Nothing went
+				wrong on our end, so we write <code>response.statusCode = 200</code> to indicate
+				this. Lastly, we use the <code>end</code> function to finalize our response and
+				send the main content.
+			</p>
+			<p>
+				The last thing we have to do is tell the server to listen on a port. We can do
+				that with the <code>listen</code> method of the server we created:
+			</p>
+			<pre>
+<code>server.listen(8000, "localhost", () => {
+    console.log(`Server listening at http://${hostname}:${port}`);
+});</code></pre>
+			<p>
+				The function accepts a port and a hostname. We can choose any port we want, but we
+				will use 8000 because that is one typically used for testing. The hostname is an ip
+				address. <code>localhost</code> is an address which represents the computer's own
+				address, which is useful for now since we want to run and test the server on the same
+				computer. The last argument is a callback function which will run when the server starts
+				listening.
+			</p>
+			<p>
+				We can now test the server. Run the program with Node.js like before and enter the
+				url <a href="http://localhost:8000/">http://localhost:8000/</a>. You should get a
+				blank page with the text "hello". 
+			</p>
+			<p>
+				We can also do other things like distinguishing between endpoints. Doing this for
+				a tiny webserver like this is pretty straightforward, we will just use a <code>switch</code>
+				statement on the url. The url after the address can be retrieved from <code>request.url</code>.
+			</p>
+			<pre>
+<code>const server = http.createServer((request, response) => {
+    response.setHeader("Content-Type", "text/plain");
+    
+    switch (request.url) {
+        case "/":
+    	    response.statusCode = 200;
+    	    response.end("Home page");
+            break
+        case "/endpoint1":
+    	    response.statusCode = 200;
+    	    response.end("You've reached endpoint 1!");
+            break
+        case "/endpoint2":
+    	    response.statusCode = 200;
+    	    response.end("Welcome to endpoint 2!");
+            break
+        default:
+    	    response.statusCode = 404;
+    	    response.end("Error, page not found");
+    }
+
+});</code></pre>
+			<p>
+				We have 3 valid urls that the client can visit: "localhost:8000", "localhost:8000/endpoint1",
+				and "localhost:8000/endpoint2". In each of these cases, the server sends something
+				different. If the client enters an endpoint that doesn't exist, like "localhost:8000/endpoint3",
+				the server will always send the text <code>"Error, page not found"</code> along with the 
+				404 status code.
+			</p>
+		</section>
+		<section class="tutorial-section">
+			<h3>Conclusion</h3>
+			<p>
+				There is a lot more to node than what this short tutorial covered, but hopefully
+				you now understand the basics of how it works and what it can be used for.
+			</p>
+		</section>
+	</article>
+	<article id="citations">
+		<h2>Citations</h2>
+		<ul>
+			<li><a href="https://nodejs.org">Node.js Website</a></li>
+			<li><a href="https://youtu.be/TlB_eWDSMt4">Node.js Tutorial for Beginners</a></li>
+			<li><a href="https://www.digitalocean.com/community/tutorials/how-to-create-a-web-server-in-node-js-with-the-http-module">How To Create a Web Server in Node.js with the HTTP Module</a></li>
+		</ul>
+	</article>
+</body>
+</html>
